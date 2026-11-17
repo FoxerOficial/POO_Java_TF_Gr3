@@ -4,6 +4,10 @@
  */
 package Vista;
 
+import Modelo.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+
 /**
  *
  * @author Juan David Perafan
@@ -12,6 +16,10 @@ package Vista;
 public class UsaProyecto extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UsaProyecto.class.getName());
+    
+    // Listas donde se guarda toda la información del aplicativo (según el diagrama)
+    static ArrayList<Proyecto> losProyectos = new ArrayList<>();
+    static ArrayList<Cliente> losClientes = new ArrayList<>();
 
     /**
      * Creates new form UsaProyecto
@@ -374,6 +382,18 @@ public class UsaProyecto extends javax.swing.JFrame {
     private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton19ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton19ActionPerformed
+
+    /** Genera el código del proyecto: año-consecutivo (ej. 2026-001). El consecutivo reinicia cada año. */
+    public static String generarCodigoProyecto(ArrayList<Proyecto> datos) {
+        int anioActual = LocalDate.now().getYear();
+        int consecutivo = 0;
+        for (Proyecto objProyecto : datos) {
+            if (objProyecto.getCodigo().startsWith(anioActual + "-")) {
+                consecutivo++;
+            }
+        }
+        return anioActual + "-" + String.format("%03d", consecutivo + 1);
+    }
 
     /**
      * @param args the command line arguments
