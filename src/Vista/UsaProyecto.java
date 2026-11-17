@@ -34,6 +34,10 @@ public class UsaProyecto extends javax.swing.JFrame {
         // Botón "Registrar integrantes": usa el código escrito en el campo "Codigo Proyecto"
         jButton2.addActionListener(e -> jTextArea1.setText(
                 registrarIntegranteProyectoDadoCodigo(losProyectos, jTextField1.getText())));
+
+        // Botón "Registrar equipo": registra varios integrantes en el proyecto del campo "Codigo Proyecto"
+        jButton3.addActionListener(e -> jTextArea1.setText(
+                registrarEquipoProyectoDadoCodigo(losProyectos, jTextField1.getText())));
     }
 
     /**
@@ -576,6 +580,45 @@ public class UsaProyecto extends javax.swing.JFrame {
 
         proyecto.agregarIntegrante(integrante);
         return "Integrante " + integrante.getNombreCompleto() + " agregado al proyecto " + proyecto.getCodigo()
+                + ".\nEl equipo ahora tiene " + proyecto.getSuEquipo().size() + " integrante(s).";
+    }
+
+    /** Registra VARIOS integrantes: pide la cantidad y luego los datos de cada uno (según el diagrama). */
+    public static String registrarEquipoProyectoDadoCodigo(ArrayList<Proyecto> datos, String codigoProyecto) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados.";
+        }
+        Proyecto proyecto = buscarProyectoPorCodigo(datos, codigoProyecto);
+        if (proyecto == null) {
+            return "No existe un proyecto con el código " + codigoProyecto;
+        }
+
+        String textoCantidad = JOptionPane.showInputDialog("¿Cuántos integrantes desea registrar?");
+        if (textoCantidad == null) {
+            return "Registro cancelado.";
+        }
+        int cantidad;
+        try {
+            cantidad = Integer.parseInt(textoCantidad.trim());
+        } catch (NumberFormatException e) {
+            return "La cantidad de integrantes debe ser un número.";
+        }
+
+        int agregados = 0;
+        for (int i = 1; i <= cantidad; i++) {
+            Empleado integrante = solicitarEmpleado("integrante " + i);
+            if (integrante == null) {
+                break; // El usuario canceló: se guardan los que ya se registraron
+            }
+            if (estaEnElEquipo(proyecto, integrante.getNumeroIdentificacion())) {
+                JOptionPane.showMessageDialog(null, "El empleado " + integrante.getNumeroIdentificacion()
+                        + " ya hace parte del equipo. No se agrega.");
+            } else {
+                proyecto.agregarIntegrante(integrante);
+                agregados++;
+            }
+        }
+        return "Se agregaron " + agregados + " integrante(s) al proyecto " + proyecto.getCodigo()
                 + ".\nEl equipo ahora tiene " + proyecto.getSuEquipo().size() + " integrante(s).";
     }
 
