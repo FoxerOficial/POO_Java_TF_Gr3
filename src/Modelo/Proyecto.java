@@ -1,5 +1,6 @@
 package Modelo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -7,7 +8,7 @@ import java.util.ArrayList;
  *
  * @author Juan David Bravo
  */
-public class Proyecto {
+public class Proyecto implements Serializable {
 
     //----- Atributos
     private String codigo;
@@ -23,7 +24,7 @@ public class Proyecto {
     //----- Constructor con parámetros
     public Proyecto(String codigo, String titulo, LocalDate fechaInicio, String unidadDuracion,
                     byte duracionEstimada, Cliente suCliente, Empleado suGerente,
-                    ArrayList<Empleado> suEquipo, String estado) {
+                    ArrayList<Empleado> suEquipo) {
         this.codigo = codigo;
         this.titulo = titulo;
         this.fechaInicio = fechaInicio;
@@ -32,12 +33,12 @@ public class Proyecto {
         this.suCliente = suCliente;
         this.suGerente = suGerente;
         this.suEquipo = suEquipo;
-        this.estado = estado;
+        this.estado = "INICIADO";
     }
 
     //----- Constructor con parámetros sin equipo
     public Proyecto(String codigo, String titulo, LocalDate fechaInicio, String unidadDuracion,
-                    byte duracionEstimada, Cliente suCliente, Empleado suGerente, String estado) {
+                    byte duracionEstimada, Cliente suCliente, Empleado suGerente) {
         this.codigo = codigo;
         this.titulo = titulo;
         this.fechaInicio = fechaInicio;
@@ -46,7 +47,7 @@ public class Proyecto {
         this.suCliente = suCliente;
         this.suGerente = suGerente;
         this.suEquipo = new ArrayList<>();
-        this.estado = estado;
+        this.estado = "INICIADO";
     }
 
     //----- Métodos Getter y Setter
@@ -125,25 +126,38 @@ public class Proyecto {
     //----- Método toString
     @Override
     public String toString() {
-        return "Código: " + codigo
-             + "\nTítulo: " + titulo
-             + "\nFecha de inicio: " + fechaInicio
-             + "\nDuración estimada: " + duracionEstimada + " " + unidadDuracion
-             + "\nEstado: " + estado
-             + "\nCliente:\n" + suCliente
-             + "\nGerente:\n" + suGerente
-             + "\nNúmero de integrantes del equipo: " + suEquipo.size();
+        String informacionEquipo;
+
+        if (suEquipo.isEmpty()) {
+            informacionEquipo = "\n          El proyecto aun no tiene equipo registrado";
+        } else {
+            informacionEquipo = "";
+            for (Empleado objEmpleado : suEquipo) {
+                informacionEquipo = informacionEquipo + "\n" + objEmpleado;
+            }
+        }
+
+        return "Proyecto:"
+                + "\n     Codigo: " + codigo
+                + "\n     Titulo: " + titulo
+                + "\n     Fecha de inicio: " + fechaInicio
+                + "\n     Duracion estimada: " + duracionEstimada + " " + unidadDuracion
+                + "\n     Fecha de finalizacion: " + determinarFechaFinalizacion()
+                + "\n     Estado: " + estado
+                + "\n     Cliente: " + suCliente
+                + "\n     Gerente: " + suGerente
+                + "\n     Equipo: " + informacionEquipo;
     }
 
     //----- Método para determinar la fecha de finalización del proyecto
     public LocalDate determinarFechaFinalizacion() {
         LocalDate fechaFinalizacion = fechaInicio;
 
-        if (unidadDuracion.equals("Dias")) {
-            fechaFinalizacion = fechaInicio.plusDays(duracionEstimada);
-        } else if (unidadDuracion.equals("Meses")) {
+        if (unidadDuracion.equals("semanas")) {
+            fechaFinalizacion = fechaInicio.plusWeeks(duracionEstimada);
+        } else if (unidadDuracion.equals("meses")) {
             fechaFinalizacion = fechaInicio.plusMonths(duracionEstimada);
-        } else if (unidadDuracion.equals("Anios")) {
+        } else if (unidadDuracion.equals("anios")) {
             fechaFinalizacion = fechaInicio.plusYears(duracionEstimada);
         }
 
