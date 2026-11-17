@@ -7,6 +7,7 @@ package Vista;
 import Modelo.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -382,6 +383,71 @@ public class UsaProyecto extends javax.swing.JFrame {
     private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton19ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton19ActionPerformed
+
+    /** Pide los datos de un empleado (el gerente o un integrante del equipo). */
+    public static Empleado solicitarEmpleado(String rol) {
+        String id = JOptionPane.showInputDialog("Número de identificación del " + rol + ":");
+        String nombre = JOptionPane.showInputDialog("Nombre completo del " + rol + ":");
+        String titulo = JOptionPane.showInputDialog("Título profesional del " + rol + ":");
+        String textoAnios = JOptionPane.showInputDialog("Años de experiencia del " + rol + ":");
+        if (id == null || nombre == null || titulo == null || textoAnios == null) {
+            return null; // El usuario canceló
+        }
+        try {
+            return new Empleado(id.trim(), nombre.trim(), titulo.trim(), Byte.parseByte(textoAnios.trim()));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Los años de experiencia deben ser un número.");
+            return null;
+        }
+    }
+
+    /** Pide el cliente: si ya existe en la lista se reutiliza; si no, se crea y se agrega a la lista. */
+    public static Cliente solicitarCliente(ArrayList<Cliente> clientes) {
+        String id = JOptionPane.showInputDialog("Número de identificación del cliente:");
+        if (id == null || id.isBlank()) {
+            return null;
+        }
+        id = id.trim();
+
+        // Si el cliente ya está registrado, no se vuelve a pedir
+        for (Cliente objCliente : clientes) {
+            if (objCliente.getNumeroIdentificacion().equals(id)) {
+                JOptionPane.showMessageDialog(null, "Cliente encontrado: " + objCliente.getNombre());
+                return objCliente;
+            }
+        }
+
+        // Cliente nuevo: se pregunta si es empresa o persona natural
+        String[] tipos = {"Empresa", "Persona natural"};
+        String tipo = (String) JOptionPane.showInputDialog(null, "Cliente nuevo. Tipo de cliente:",
+                "Registrar cliente", JOptionPane.QUESTION_MESSAGE, null, tipos, tipos[0]);
+        String nombre = JOptionPane.showInputDialog("Nombre del cliente:");
+        String ciudad = JOptionPane.showInputDialog("Ciudad del cliente:");
+        if (tipo == null || nombre == null || ciudad == null) {
+            return null;
+        }
+
+        Cliente nuevo;
+        if (tipo.equals("Empresa")) {
+            String nombreContacto = JOptionPane.showInputDialog("Nombre completo del contacto en la empresa:");
+            String cargo = JOptionPane.showInputDialog("Cargo del contacto:");
+            String telefono = JOptionPane.showInputDialog("Teléfono del contacto:");
+            String correo = JOptionPane.showInputDialog("Correo del contacto:");
+            if (nombreContacto == null || cargo == null || telefono == null || correo == null) {
+                return null;
+            }
+            nuevo = new ClienteEmpresa(new Contacto(nombreContacto, cargo, telefono, correo), id, nombre, ciudad);
+        } else {
+            String telefono = JOptionPane.showInputDialog("Teléfono del cliente:");
+            String correo = JOptionPane.showInputDialog("Correo del cliente:");
+            if (telefono == null || correo == null) {
+                return null;
+            }
+            nuevo = new ClientePersona(telefono, correo, id, nombre, ciudad);
+        }
+        clientes.add(nuevo);
+        return nuevo;
+    }
 
     /** Genera el código del proyecto: año-consecutivo (ej. 2026-001). El consecutivo reinicia cada año. */
     public static String generarCodigoProyecto(ArrayList<Proyecto> datos) {
