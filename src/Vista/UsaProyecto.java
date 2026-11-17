@@ -38,6 +38,10 @@ public class UsaProyecto extends javax.swing.JFrame {
         // Botón "Registrar equipo": registra varios integrantes en el proyecto del campo "Codigo Proyecto"
         jButton3.addActionListener(e -> jTextArea1.setText(
                 registrarEquipoProyectoDadoCodigo(losProyectos, jTextField1.getText())));
+
+        // Botón "Eliminar integrantes": quita un integrante del proyecto del campo "Codigo Proyecto"
+        jButton5.addActionListener(e -> jTextArea1.setText(
+                eliminarIntegranteProyectoDadoCodigo(losProyectos, jTextField1.getText())));
     }
 
     /**
@@ -619,6 +623,33 @@ public class UsaProyecto extends javax.swing.JFrame {
             }
         }
         return "Se agregaron " + agregados + " integrante(s) al proyecto " + proyecto.getCodigo()
+                + ".\nEl equipo ahora tiene " + proyecto.getSuEquipo().size() + " integrante(s).";
+    }
+
+    /** Elimina un integrante del equipo del proyecto indicado (según el diagrama). */
+    public static String eliminarIntegranteProyectoDadoCodigo(ArrayList<Proyecto> datos, String codigoProyecto) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados.";
+        }
+        Proyecto proyecto = buscarProyectoPorCodigo(datos, codigoProyecto);
+        if (proyecto == null) {
+            return "No existe un proyecto con el código " + codigoProyecto;
+        }
+        if (proyecto.getSuEquipo().isEmpty()) {
+            return "El proyecto " + proyecto.getCodigo() + " no tiene integrantes en su equipo.";
+        }
+
+        String id = JOptionPane.showInputDialog("Número de identificación del integrante a eliminar:");
+        if (id == null || id.isBlank()) {
+            return "Eliminación cancelada.";
+        }
+
+        // eliminarIntegrante (clase Proyecto) devuelve el empleado eliminado, o null si no estaba en el equipo
+        Empleado eliminado = proyecto.eliminarIntegrante(id.trim());
+        if (eliminado == null) {
+            return "El empleado " + id.trim() + " no hace parte del equipo del proyecto " + proyecto.getCodigo() + ".";
+        }
+        return "Integrante " + eliminado.getNombreCompleto() + " eliminado del proyecto " + proyecto.getCodigo()
                 + ".\nEl equipo ahora tiene " + proyecto.getSuEquipo().size() + " integrante(s).";
     }
 
