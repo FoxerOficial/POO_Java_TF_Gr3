@@ -27,6 +27,9 @@ public class UsaProyecto extends javax.swing.JFrame {
      */
     public UsaProyecto() {
         initComponents();
+
+        // Botón "Registrar proyecto"
+        jButton1.addActionListener(e -> registrarProyecto(losProyectos));
     }
 
     /**
@@ -447,6 +450,79 @@ public class UsaProyecto extends javax.swing.JFrame {
         }
         clientes.add(nuevo);
         return nuevo;
+    }
+
+    /** Realiza el proceso de registro de un proyecto y lo agrega a la lista (según el diagrama). */
+    public static ArrayList<Proyecto> registrarProyecto(ArrayList<Proyecto> datos) {
+        String codigo = generarCodigoProyecto(datos);
+
+        // Título: entre 20 y 100 caracteres
+        String titulo = "";
+        while (titulo.length() < 20 || titulo.length() > 100) {
+            titulo = JOptionPane.showInputDialog("Título del proyecto (entre 20 y 100 caracteres):");
+            if (titulo == null) {
+                return datos; // El usuario canceló el registro
+            }
+            titulo = titulo.trim();
+        }
+
+        // Fecha de inicio en formato aaaa-mm-dd
+        LocalDate fechaInicio = null;
+        while (fechaInicio == null) {
+            String textoFecha = JOptionPane.showInputDialog("Fecha de inicio (aaaa-mm-dd), ej. 2026-11-17:");
+            if (textoFecha == null) {
+                return datos;
+            }
+            try {
+                fechaInicio = LocalDate.parse(textoFecha.trim());
+            } catch (java.time.format.DateTimeParseException e) {
+                JOptionPane.showMessageDialog(null, "Fecha inválida. Use el formato aaaa-mm-dd.");
+            }
+        }
+
+        // Unidad y duración estimada
+        String[] unidades = {"Semanas", "Meses", "Anios"};
+        String unidad = (String) JOptionPane.showInputDialog(null, "Unidad de duración:", "Registrar proyecto",
+                JOptionPane.QUESTION_MESSAGE, null, unidades, unidades[0]);
+        if (unidad == null) {
+            return datos;
+        }
+        byte duracion = 0;
+        while (!esDuracionValida(unidad, duracion)) {
+            String textoDuracion = JOptionPane.showInputDialog("Duración estimada en " + unidad
+                    + (unidad.equals("Meses") ? " (entre 1 y 35, sin 12 ni 24):" : " (entre 1 y 3):"));
+            if (textoDuracion == null) {
+                return datos;
+            }
+            try {
+                duracion = Byte.parseByte(textoDuracion.trim());
+            } catch (NumberFormatException e) {
+                duracion = 0; // No es un número: se vuelve a pedir
+            }
+        }
+
+        // Cliente y gerente
+        Cliente cliente = solicitarCliente(losClientes);
+        if (cliente == null) {
+            return datos;
+        }
+        Empleado gerente = solicitarEmpleado("gerente");
+        if (gerente == null) {
+            return datos;
+        }
+
+        // El proyecto se registra sin equipo y con estado INICIADO por defecto
+        datos.add(new Proyecto(codigo, titulo, fechaInicio, unidad, duracion, cliente, gerente, "INICIADO"));
+        JOptionPane.showMessageDialog(null, "Proyecto registrado con el código " + codigo);
+        return datos;
+    }
+
+    /** Revisa la duración según el diagrama: semanas y años entre 1 y 3; meses entre 1 y 35 sin 12 ni 24. */
+    public static boolean esDuracionValida(String unidad, byte duracion) {
+        if (unidad.equals("Meses")) {
+            return duracion >= 1 && duracion <= 35 && duracion % 12 != 0;
+        }
+        return duracion >= 1 && duracion <= 3;
     }
 
     /** Genera el código del proyecto: año-consecutivo (ej. 2026-001). El consecutivo reinicia cada año. */
