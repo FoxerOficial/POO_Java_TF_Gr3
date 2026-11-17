@@ -139,8 +139,8 @@ public class Proyecto {
     public LocalDate determinarFechaFinalizacion() {
         LocalDate fechaFinalizacion = fechaInicio;
 
-        if (unidadDuracion.equals("Dias")) {
-            fechaFinalizacion = fechaInicio.plusDays(duracionEstimada);
+        if (unidadDuracion.equals("Semanas")) {
+            fechaFinalizacion = fechaInicio.plusWeeks(duracionEstimada);
         } else if (unidadDuracion.equals("Meses")) {
             fechaFinalizacion = fechaInicio.plusMonths(duracionEstimada);
         } else if (unidadDuracion.equals("Anios")) {
