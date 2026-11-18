@@ -680,7 +680,7 @@ public class UsaProyecto extends javax.swing.JFrame {
         for (Proyecto p : datos) {
             if (p.getSuGerente() != null && p.getSuGerente().getNumeroIdentificacion().equals(numIDEGerente.trim())) {
                 resultado.append(p.toString())
-                         .append("\nFecha de finalización estimada: ").append(p.determinaFechaFinalizacion())
+                         .append("\nFecha de finalización estimada: ").append(p.determinarFechaFinalizacion())
                          .append("\n--------------------------------------------------\n");
                 encontrados = true;
             }
@@ -698,7 +698,7 @@ public class UsaProyecto extends javax.swing.JFrame {
         for (Proyecto p : datos) {
             if (p.getSuCliente() != null && p.getSuCliente().getNumeroIdentificacion().equals(numIDECliente.trim())) {
                 resultado.append(p.toString())
-                         .append("\nFecha de finalización estimada: ").append(p.determinaFechaFinalizacion())
+                         .append("\nFecha de finalización estimada: ").append(p.determinarFechaFinalizacion())
                          .append("\n--------------------------------------------------\n");
                 encontrados = true;
             }
@@ -710,7 +710,7 @@ public class UsaProyecto extends javax.swing.JFrame {
         if (datos.isEmpty()) return "No hay proyectos registrados.";
         StringBuilder sb = new StringBuilder("--- TODOS LOS PROYECTOS ---\n\n");
         for (Proyecto p : datos) {
-            sb.append(p.toString()).append("\nFecha fin: ").append(p.determinaFechaFinalizacion()).append("\n------------------\n");
+            sb.append(p.toString()).append("\nFecha fin: ").append(p.determinarFechaFinalizacion()).append("\n------------------\n");
         }
         return sb.toString();
     }
@@ -721,7 +721,7 @@ public class UsaProyecto extends javax.swing.JFrame {
         boolean enc = false;
         for (Proyecto p : datos) {
             if ("EN CURSO".equalsIgnoreCase(p.getEstado())) {
-                sb.append(p.toString()).append("\nFecha fin: ").append(p.determinaFechaFinalizacion()).append("\n------------------\n");
+                sb.append(p.toString()).append("\nFecha fin: ").append(p.determinarFechaFinalizacion()).append("\n------------------\n");
                 enc = true;
             }
         }
@@ -731,13 +731,13 @@ public class UsaProyecto extends javax.swing.JFrame {
     public static String consultarPrimerProyecto(ArrayList<Proyecto> datos) {
         if (datos.isEmpty()) return "No hay proyectos registrados.";
         Proyecto p = datos.get(0);
-        return "--- PRIMER PROYECTO ---\n\n" + p.toString() + "\nFecha fin: " + p.determinaFechaFinalizacion();
+        return "--- PRIMER PROYECTO ---\n\n" + p.toString() + "\nFecha fin: " + p.determinarFechaFinalizacion();
     }
 
     public static String consultarUltimoProyecto(ArrayList<Proyecto> datos) {
         if (datos.isEmpty()) return "No hay proyectos registrados.";
         Proyecto p = datos.get(datos.size() - 1);
-        return "--- ÚLTIMO PROYECTO ---\n\n" + p.toString() + "\nFecha fin: " + p.determinaFechaFinalizacion();
+        return "--- ÚLTIMO PROYECTO ---\n\n" + p.toString() + "\nFecha fin: " + p.determinarFechaFinalizacion();
     }
 
     public static String consultarGerenteProyectoDadoCodigo(ArrayList<Proyecto> datos, String cod) {

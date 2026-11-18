@@ -1,5 +1,6 @@
 package Modelo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -7,7 +8,7 @@ import java.util.ArrayList;
  *
  * @author Juan David Bravo
  */
-public class Proyecto {
+public class Proyecto implements Serializable {
 
     //----- Atributos
     private String codigo;
