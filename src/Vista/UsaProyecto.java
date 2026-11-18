@@ -4,6 +4,11 @@
  */
 package Vista;
 
+import Modelo.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Juan David Perafan
@@ -12,12 +17,31 @@ package Vista;
 public class UsaProyecto extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UsaProyecto.class.getName());
+    
+    // Listas donde se guarda toda la información del aplicativo (según el diagrama)
+    static ArrayList<Proyecto> losProyectos = new ArrayList<>();
+    static ArrayList<Cliente> losClientes = new ArrayList<>();
 
     /**
      * Creates new form UsaProyecto
      */
     public UsaProyecto() {
         initComponents();
+
+        // Botón "Registrar proyecto"
+        jButton1.addActionListener(e -> registrarProyecto(losProyectos));
+
+        // Botón "Registrar integrantes": usa el código escrito en el campo "Codigo Proyecto"
+        jButton2.addActionListener(e -> jTextArea1.setText(
+                registrarIntegranteProyectoDadoCodigo(losProyectos, jTextField1.getText())));
+
+        // Botón "Registrar equipo": registra varios integrantes en el proyecto del campo "Codigo Proyecto"
+        jButton3.addActionListener(e -> jTextArea1.setText(
+                registrarEquipoProyectoDadoCodigo(losProyectos, jTextField1.getText())));
+
+        // Botón "Eliminar integrantes": quita un integrante del proyecto del campo "Codigo Proyecto"
+        jButton5.addActionListener(e -> jTextArea1.setText(
+                eliminarIntegranteProyectoDadoCodigo(losProyectos, jTextField1.getText())));
     }
 
     /**
@@ -374,6 +398,272 @@ public class UsaProyecto extends javax.swing.JFrame {
     private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton19ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton19ActionPerformed
+
+    /** Pide los datos de un empleado (el gerente o un integrante del equipo). */
+    public static Empleado solicitarEmpleado(String rol) {
+        String id = JOptionPane.showInputDialog("Número de identificación del " + rol + ":");
+        String nombre = JOptionPane.showInputDialog("Nombre completo del " + rol + ":");
+        String titulo = JOptionPane.showInputDialog("Título profesional del " + rol + ":");
+        String textoAnios = JOptionPane.showInputDialog("Años de experiencia del " + rol + ":");
+        if (id == null || nombre == null || titulo == null || textoAnios == null) {
+            return null; // El usuario canceló
+        }
+        try {
+            return new Empleado(id.trim(), nombre.trim(), titulo.trim(), Byte.parseByte(textoAnios.trim()));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Los años de experiencia deben ser un número.");
+            return null;
+        }
+    }
+
+    /** Pide el cliente: si ya existe en la lista se reutiliza; si no, se crea y se agrega a la lista. */
+    public static Cliente solicitarCliente(ArrayList<Cliente> clientes) {
+        String id = JOptionPane.showInputDialog("Número de identificación del cliente:");
+        if (id == null || id.isBlank()) {
+            return null;
+        }
+        id = id.trim();
+
+        // Si el cliente ya está registrado, no se vuelve a pedir
+        for (Cliente objCliente : clientes) {
+            if (objCliente.getNumeroIdentificacion().equals(id)) {
+                JOptionPane.showMessageDialog(null, "Cliente encontrado: " + objCliente.getNombre());
+                return objCliente;
+            }
+        }
+
+        // Cliente nuevo: se pregunta si es empresa o persona natural
+        String[] tipos = {"Empresa", "Persona natural"};
+        String tipo = (String) JOptionPane.showInputDialog(null, "Cliente nuevo. Tipo de cliente:",
+                "Registrar cliente", JOptionPane.QUESTION_MESSAGE, null, tipos, tipos[0]);
+        String nombre = JOptionPane.showInputDialog("Nombre del cliente:");
+        String ciudad = JOptionPane.showInputDialog("Ciudad del cliente:");
+        if (tipo == null || nombre == null || ciudad == null) {
+            return null;
+        }
+
+        Cliente nuevo;
+        if (tipo.equals("Empresa")) {
+            String nombreContacto = JOptionPane.showInputDialog("Nombre completo del contacto en la empresa:");
+            String cargo = JOptionPane.showInputDialog("Cargo del contacto:");
+            String telefono = JOptionPane.showInputDialog("Teléfono del contacto:");
+            String correo = JOptionPane.showInputDialog("Correo del contacto:");
+            if (nombreContacto == null || cargo == null || telefono == null || correo == null) {
+                return null;
+            }
+            nuevo = new ClienteEmpresa(new Contacto(nombreContacto, cargo, telefono, correo), id, nombre, ciudad);
+        } else {
+            String telefono = JOptionPane.showInputDialog("Teléfono del cliente:");
+            String correo = JOptionPane.showInputDialog("Correo del cliente:");
+            if (telefono == null || correo == null) {
+                return null;
+            }
+            nuevo = new ClientePersona(telefono, correo, id, nombre, ciudad);
+        }
+        clientes.add(nuevo);
+        return nuevo;
+    }
+
+    /** Realiza el proceso de registro de un proyecto y lo agrega a la lista (según el diagrama). */
+    public static ArrayList<Proyecto> registrarProyecto(ArrayList<Proyecto> datos) {
+        String codigo = generarCodigoProyecto(datos);
+
+        // Título: entre 20 y 100 caracteres
+        String titulo = "";
+        while (titulo.length() < 20 || titulo.length() > 100) {
+            titulo = JOptionPane.showInputDialog("Título del proyecto (entre 20 y 100 caracteres):");
+            if (titulo == null) {
+                return datos; // El usuario canceló el registro
+            }
+            titulo = titulo.trim();
+            if (titulo.length() < 20 || titulo.length() > 100) {
+                JOptionPane.showMessageDialog(null, "El título debe tener entre 20 y 100 caracteres. El suyo tiene "
+                        + titulo.length() + ".");
+            }
+        }
+
+        // Fecha de inicio en formato aaaa-mm-dd
+        LocalDate fechaInicio = null;
+        while (fechaInicio == null) {
+            String textoFecha = JOptionPane.showInputDialog("Fecha de inicio (aaaa-mm-dd), ej. 2026-11-17:");
+            if (textoFecha == null) {
+                return datos;
+            }
+            try {
+                fechaInicio = LocalDate.parse(textoFecha.trim());
+            } catch (java.time.format.DateTimeParseException e) {
+                JOptionPane.showMessageDialog(null, "Fecha inválida. Use el formato aaaa-mm-dd.");
+            }
+        }
+
+        // Unidad y duración estimada
+        String[] unidades = {"Semanas", "Meses", "Anios"};
+        String unidad = (String) JOptionPane.showInputDialog(null, "Unidad de duración:", "Registrar proyecto",
+                JOptionPane.QUESTION_MESSAGE, null, unidades, unidades[0]);
+        if (unidad == null) {
+            return datos;
+        }
+        byte duracion = 0;
+        while (!esDuracionValida(unidad, duracion)) {
+            String textoDuracion = JOptionPane.showInputDialog("Duración estimada en " + unidad
+                    + (unidad.equals("Meses") ? " (entre 1 y 35, sin 12 ni 24):" : " (entre 1 y 3):"));
+            if (textoDuracion == null) {
+                return datos;
+            }
+            try {
+                duracion = Byte.parseByte(textoDuracion.trim());
+            } catch (NumberFormatException e) {
+                duracion = 0; // No es un número: se vuelve a pedir
+            }
+            if (!esDuracionValida(unidad, duracion)) {
+                JOptionPane.showMessageDialog(null, "Duración inválida. Escriba solo el número dentro del rango indicado.");
+            }
+        }
+
+        // Cliente y gerente
+        Cliente cliente = solicitarCliente(losClientes);
+        if (cliente == null) {
+            return datos;
+        }
+        Empleado gerente = solicitarEmpleado("gerente");
+        if (gerente == null) {
+            return datos;
+        }
+
+        // El proyecto se registra sin equipo y con estado INICIADO por defecto
+        datos.add(new Proyecto(codigo, titulo, fechaInicio, unidad, duracion, cliente, gerente, "INICIADO"));
+        JOptionPane.showMessageDialog(null, "Proyecto registrado con el código " + codigo);
+        return datos;
+    }
+
+    /** Revisa la duración según el diagrama: semanas y años entre 1 y 3; meses entre 1 y 35 sin 12 ni 24. */
+    public static boolean esDuracionValida(String unidad, byte duracion) {
+        if (unidad.equals("Meses")) {
+            return duracion >= 1 && duracion <= 35 && duracion % 12 != 0;
+        }
+        return duracion >= 1 && duracion <= 3;
+    }
+
+    /** Busca un proyecto por su código; devuelve null si no existe. */
+    public static Proyecto buscarProyectoPorCodigo(ArrayList<Proyecto> datos, String codigoProyecto) {
+        for (Proyecto objProyecto : datos) {
+            if (objProyecto.getCodigo().equals(codigoProyecto.trim())) {
+                return objProyecto;
+            }
+        }
+        return null;
+    }
+
+    /** Revisa si un empleado ya hace parte del equipo del proyecto (un integrante no se puede repetir). */
+    public static boolean estaEnElEquipo(Proyecto proyecto, String numeroIdentificacion) {
+        for (Empleado objEmpleado : proyecto.getSuEquipo()) {
+            if (objEmpleado.getNumeroIdentificacion().equals(numeroIdentificacion)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Registra UN integrante en el equipo del proyecto indicado (según el diagrama). */
+    public static String registrarIntegranteProyectoDadoCodigo(ArrayList<Proyecto> datos, String codigoProyecto) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados.";
+        }
+        Proyecto proyecto = buscarProyectoPorCodigo(datos, codigoProyecto);
+        if (proyecto == null) {
+            return "No existe un proyecto con el código " + codigoProyecto;
+        }
+
+        Empleado integrante = solicitarEmpleado("integrante");
+        if (integrante == null) {
+            return "Registro cancelado.";
+        }
+        if (estaEnElEquipo(proyecto, integrante.getNumeroIdentificacion())) {
+            return "El empleado " + integrante.getNumeroIdentificacion() + " ya hace parte del equipo del proyecto.";
+        }
+
+        proyecto.agregarIntegrante(integrante);
+        return "Integrante " + integrante.getNombreCompleto() + " agregado al proyecto " + proyecto.getCodigo()
+                + ".\nEl equipo ahora tiene " + proyecto.getSuEquipo().size() + " integrante(s).";
+    }
+
+    /** Registra VARIOS integrantes: pide la cantidad y luego los datos de cada uno (según el diagrama). */
+    public static String registrarEquipoProyectoDadoCodigo(ArrayList<Proyecto> datos, String codigoProyecto) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados.";
+        }
+        Proyecto proyecto = buscarProyectoPorCodigo(datos, codigoProyecto);
+        if (proyecto == null) {
+            return "No existe un proyecto con el código " + codigoProyecto;
+        }
+
+        String textoCantidad = JOptionPane.showInputDialog("¿Cuántos integrantes desea registrar?");
+        if (textoCantidad == null) {
+            return "Registro cancelado.";
+        }
+        int cantidad;
+        try {
+            cantidad = Integer.parseInt(textoCantidad.trim());
+        } catch (NumberFormatException e) {
+            return "La cantidad de integrantes debe ser un número.";
+        }
+
+        int agregados = 0;
+        for (int i = 1; i <= cantidad; i++) {
+            Empleado integrante = solicitarEmpleado("integrante " + i);
+            if (integrante == null) {
+                break; // El usuario canceló: se guardan los que ya se registraron
+            }
+            if (estaEnElEquipo(proyecto, integrante.getNumeroIdentificacion())) {
+                JOptionPane.showMessageDialog(null, "El empleado " + integrante.getNumeroIdentificacion()
+                        + " ya hace parte del equipo. No se agrega.");
+            } else {
+                proyecto.agregarIntegrante(integrante);
+                agregados++;
+            }
+        }
+        return "Se agregaron " + agregados + " integrante(s) al proyecto " + proyecto.getCodigo()
+                + ".\nEl equipo ahora tiene " + proyecto.getSuEquipo().size() + " integrante(s).";
+    }
+
+    /** Elimina un integrante del equipo del proyecto indicado (según el diagrama). */
+    public static String eliminarIntegranteProyectoDadoCodigo(ArrayList<Proyecto> datos, String codigoProyecto) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados.";
+        }
+        Proyecto proyecto = buscarProyectoPorCodigo(datos, codigoProyecto);
+        if (proyecto == null) {
+            return "No existe un proyecto con el código " + codigoProyecto;
+        }
+        if (proyecto.getSuEquipo().isEmpty()) {
+            return "El proyecto " + proyecto.getCodigo() + " no tiene integrantes en su equipo.";
+        }
+
+        String id = JOptionPane.showInputDialog("Número de identificación del integrante a eliminar:");
+        if (id == null || id.isBlank()) {
+            return "Eliminación cancelada.";
+        }
+
+        // eliminarIntegrante (clase Proyecto) devuelve el empleado eliminado, o null si no estaba en el equipo
+        Empleado eliminado = proyecto.eliminarIntegrante(id.trim());
+        if (eliminado == null) {
+            return "El empleado " + id.trim() + " no hace parte del equipo del proyecto " + proyecto.getCodigo() + ".";
+        }
+        return "Integrante " + eliminado.getNombreCompleto() + " eliminado del proyecto " + proyecto.getCodigo()
+                + ".\nEl equipo ahora tiene " + proyecto.getSuEquipo().size() + " integrante(s).";
+    }
+
+    /** Genera el código del proyecto: año-consecutivo (ej. 2026-001). El consecutivo reinicia cada año. */
+    public static String generarCodigoProyecto(ArrayList<Proyecto> datos) {
+        int anioActual = LocalDate.now().getYear();
+        int consecutivo = 0;
+        for (Proyecto objProyecto : datos) {
+            if (objProyecto.getCodigo().startsWith(anioActual + "-")) {
+                consecutivo++;
+            }
+        }
+        return anioActual + "-" + String.format("%03d", consecutivo + 1);
+    }
 
     /**
      * @param args the command line arguments
