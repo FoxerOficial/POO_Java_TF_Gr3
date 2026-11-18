@@ -42,6 +42,23 @@ public class UsaProyecto extends javax.swing.JFrame {
         // Botón "Eliminar integrantes": quita un integrante del proyecto del campo "Codigo Proyecto"
         jButton5.addActionListener(e -> jTextArea1.setText(
                 eliminarIntegranteProyectoDadoCodigo(losProyectos, jTextField1.getText())));
+        jButton6.addActionListener(e -> jTextArea1.setText(consultarTodosProyectos(losProyectos)));
+        jButton7.addActionListener(e -> jTextArea1.setText(consultarProyectosEnCurso(losProyectos)));
+        jButton8.addActionListener(e -> jTextArea1.setText(consultarPrimerProyecto(losProyectos)));
+        jButton9.addActionListener(e -> jTextArea1.setText(consultarUltimoProyecto(losProyectos)));
+
+        // Consultas que leen los campos de texto (TextFields)
+        jButton13.addActionListener(e -> jTextArea1.setText(
+                consultarProyectosDadoNumIDEGerente(losProyectos, jTextField2.getText())));
+        
+        jButton14.addActionListener(e -> jTextArea1.setText(
+                consultarProyectosDadoNumIDECliente(losProyectos, jTextField3.getText())));
+        
+        jButton11.addActionListener(e -> jTextArea1.setText(
+                consultarGerenteProyectoDadoCodigo(losProyectos, jTextField4.getText())));
+        
+        jButton12.addActionListener(e -> jTextArea1.setText(
+                consultarEquipoProyectoDadoCodigo(losProyectos, jTextField4.getText())));
     }
 
     /**
@@ -68,7 +85,6 @@ public class UsaProyecto extends javax.swing.JFrame {
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
-        jButton10 = new javax.swing.JButton();
         jButton11 = new javax.swing.JButton();
         jButton12 = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
@@ -76,10 +92,9 @@ public class UsaProyecto extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jTextField2 = new javax.swing.JTextField();
         jTextField3 = new javax.swing.JTextField();
-        jComboBox1 = new javax.swing.JComboBox<>();
         jButton13 = new javax.swing.JButton();
         jButton14 = new javax.swing.JButton();
-        jButton15 = new javax.swing.JButton();
+        jTextField4 = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -157,15 +172,12 @@ public class UsaProyecto extends javax.swing.JFrame {
         jLabel3.setText("Consultas");
 
         jButton6.setText("Consultar todos");
-        jButton6.setActionCommand("Consultar todos");
 
         jButton7.setText("Consultar en curso");
 
         jButton8.setText(" Consultar primero");
 
         jButton9.setText("Consultar ultimo");
-
-        jButton10.setText("Consultar por codigo");
 
         jButton11.setText("Consultar gerente");
         jButton11.addActionListener(this::jButton11ActionPerformed);
@@ -176,40 +188,22 @@ public class UsaProyecto extends javax.swing.JFrame {
 
         jLabel5.setText("Num. ID cliente");
 
-        jLabel6.setText("Tipo de cliente");
+        jLabel6.setText("Num. ID projecto");
 
         jTextField2.addActionListener(this::jTextField2ActionPerformed);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jTextField3.addActionListener(this::jTextField3ActionPerformed);
 
         jButton13.setText("Consultar por gerente");
 
         jButton14.setText("Consultar por cliente");
 
-        jButton15.setText("Consultar por tipo");
-        jButton15.addActionListener(this::jButton15ActionPerformed);
+        jTextField4.addActionListener(this::jTextField4ActionPerformed);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jButton6)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton7)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton8)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton9))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jButton10)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton11)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton12)))
-                .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -217,22 +211,33 @@ public class UsaProyecto extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel6))
-                        .addGap(18, 18, 18)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel5))
+                        .addGap(22, 22, 22)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jButton13))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButton14))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButton15)))))
+                                .addComponent(jButton11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton12))
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jButton14))
+                                .addGroup(jPanel2Layout.createSequentialGroup()
+                                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jButton13)))))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jButton6)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton7)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton8)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton9)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -240,18 +245,13 @@ public class UsaProyecto extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(34, 34, 34)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton6)
                     .addComponent(jButton7)
                     .addComponent(jButton8)
                     .addComponent(jButton9))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton10)
-                    .addComponent(jButton11)
-                    .addComponent(jButton12))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(31, 31, 31)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -261,12 +261,14 @@ public class UsaProyecto extends javax.swing.JFrame {
                     .addComponent(jLabel5)
                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton14))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton15))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton11)
+                        .addComponent(jButton12)
+                        .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel6))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
 
         jLabel7.setText("Resultado consultas");
@@ -294,7 +296,7 @@ public class UsaProyecto extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -387,10 +389,6 @@ public class UsaProyecto extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField2ActionPerformed
 
-    private void jButton15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton15ActionPerformed
-
     private void jButton16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton16ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton16ActionPerformed
@@ -398,6 +396,14 @@ public class UsaProyecto extends javax.swing.JFrame {
     private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton19ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton19ActionPerformed
+
+    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField3ActionPerformed
+
+    private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField4ActionPerformed
 
     /** Pide los datos de un empleado (el gerente o un integrante del equipo). */
     public static Empleado solicitarEmpleado(String rol) {
@@ -664,6 +670,94 @@ public class UsaProyecto extends javax.swing.JFrame {
         }
         return anioActual + "-" + String.format("%03d", consecutivo + 1);
     }
+    /** 8. Consultar los proyectos dados el número de identificación del gerente. */
+    public static String consultarProyectosDadoNumIDEGerente(ArrayList<Proyecto> datos, String numIDEGerente) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados.";
+        }
+        StringBuilder resultado = new StringBuilder("--- PROYECTOS DEL GERENTE (ID: " + numIDEGerente + ") ---\n\n");
+        boolean encontrados = false;
+        for (Proyecto p : datos) {
+            if (p.getSuGerente() != null && p.getSuGerente().getNumeroIdentificacion().equals(numIDEGerente.trim())) {
+                resultado.append(p.toString())
+                         .append("\nFecha de finalización estimada: ").append(p.determinaFechaFinalizacion())
+                         .append("\n--------------------------------------------------\n");
+                encontrados = true;
+            }
+        }
+        return encontrados ? resultado.toString() : "No se encontraron proyectos para el gerente con ID " + numIDEGerente;
+    }
+
+    /** 9. Consultar los proyectos dados el número de identificación del cliente. */
+    public static String consultarProyectosDadoNumIDECliente(ArrayList<Proyecto> datos, String numIDECliente) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados.";
+        }
+        StringBuilder resultado = new StringBuilder("--- PROYECTOS DEL CLIENTE (ID: " + numIDECliente + ") ---\n\n");
+        boolean encontrados = false;
+        for (Proyecto p : datos) {
+            if (p.getSuCliente() != null && p.getSuCliente().getNumeroIdentificacion().equals(numIDECliente.trim())) {
+                resultado.append(p.toString())
+                         .append("\nFecha de finalización estimada: ").append(p.determinaFechaFinalizacion())
+                         .append("\n--------------------------------------------------\n");
+                encontrados = true;
+            }
+        }
+        return encontrados ? resultado.toString() : "No se encontraron proyectos para el cliente con ID " + numIDECliente;
+    }
+
+    public static String consultarTodosProyectos(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) return "No hay proyectos registrados.";
+        StringBuilder sb = new StringBuilder("--- TODOS LOS PROYECTOS ---\n\n");
+        for (Proyecto p : datos) {
+            sb.append(p.toString()).append("\nFecha fin: ").append(p.determinaFechaFinalizacion()).append("\n------------------\n");
+        }
+        return sb.toString();
+    }
+
+    public static String consultarProyectosEnCurso(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) return "No hay proyectos registrados.";
+        StringBuilder sb = new StringBuilder("--- PROYECTOS EN CURSO ---\n\n");
+        boolean enc = false;
+        for (Proyecto p : datos) {
+            if ("EN CURSO".equalsIgnoreCase(p.getEstado())) {
+                sb.append(p.toString()).append("\nFecha fin: ").append(p.determinaFechaFinalizacion()).append("\n------------------\n");
+                enc = true;
+            }
+        }
+        return enc ? sb.toString() : "No hay proyectos en curso.";
+    }
+
+    public static String consultarPrimerProyecto(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) return "No hay proyectos registrados.";
+        Proyecto p = datos.get(0);
+        return "--- PRIMER PROYECTO ---\n\n" + p.toString() + "\nFecha fin: " + p.determinaFechaFinalizacion();
+    }
+
+    public static String consultarUltimoProyecto(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) return "No hay proyectos registrados.";
+        Proyecto p = datos.get(datos.size() - 1);
+        return "--- ÚLTIMO PROYECTO ---\n\n" + p.toString() + "\nFecha fin: " + p.determinaFechaFinalizacion();
+    }
+
+    public static String consultarGerenteProyectoDadoCodigo(ArrayList<Proyecto> datos, String cod) {
+        if (datos.isEmpty()) return "No hay proyectos registrados.";
+        Proyecto p = buscarProyectoPorCodigo(datos, cod);
+        if (p == null) return "No existe el proyecto con código " + cod;
+        return "--- GERENTE DEL PROYECTO " + p.getCodigo() + " ---\n" + p.getSuGerente().toString();
+    }
+
+    public static String consultarEquipoProyectoDadoCodigo(ArrayList<Proyecto> datos, String cod) {
+        if (datos.isEmpty()) return "No hay proyectos registrados.";
+        Proyecto p = buscarProyectoPorCodigo(datos, cod);
+        if (p == null) return "No existe el proyecto con código " + cod;
+        if (p.getSuEquipo().isEmpty()) return "El proyecto no tiene equipo.";
+        StringBuilder sb = new StringBuilder("--- EQUIPO PROYECTO " + p.getCodigo() + " ---\n");
+        for (var e : p.getSuEquipo()) {
+            sb.append(e.toString()).append("\n------------------\n");
+        }
+        return sb.toString();
+    }
 
     /**
      * @param args the command line arguments
@@ -692,12 +786,10 @@ public class UsaProyecto extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
     private javax.swing.JButton jButton12;
     private javax.swing.JButton jButton13;
     private javax.swing.JButton jButton14;
-    private javax.swing.JButton jButton15;
     private javax.swing.JButton jButton16;
     private javax.swing.JButton jButton17;
     private javax.swing.JButton jButton18;
@@ -710,7 +802,6 @@ public class UsaProyecto extends javax.swing.JFrame {
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -728,5 +819,6 @@ public class UsaProyecto extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField jTextField4;
     // End of variables declaration//GEN-END:variables
 }
