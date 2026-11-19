@@ -22,10 +22,13 @@ public final class ClienteEmpresa extends Cliente{
     }
     
     
+ 
+    public Contacto getSuContacto() { 
+        return suContacto; 
+    }
     
-    public Contacto getSuContacto() { return suContacto; }
-    
-    public void setSuContacto(Contacto suContacto) { this.suContacto = suContacto; }
+    public void setSuContacto(Contacto suContacto) { 
+        this.suContacto = suContacto; }
 
     @Override
     public String toString() {

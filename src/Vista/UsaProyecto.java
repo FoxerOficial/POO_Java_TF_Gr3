@@ -8,6 +8,11 @@ import Modelo.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  *
@@ -42,10 +47,17 @@ public class UsaProyecto extends javax.swing.JFrame {
         // Botón "Eliminar integrantes": quita un integrante del proyecto del campo "Codigo Proyecto"
         jButton5.addActionListener(e -> jTextArea1.setText(
                 eliminarIntegranteProyectoDadoCodigo(losProyectos, jTextField1.getText())));
-        jButton6.addActionListener(e -> jTextArea1.setText(consultarTodosProyectos(losProyectos)));
-        jButton7.addActionListener(e -> jTextArea1.setText(consultarProyectosEnCurso(losProyectos)));
-        jButton8.addActionListener(e -> jTextArea1.setText(consultarPrimerProyecto(losProyectos)));
-        jButton9.addActionListener(e -> jTextArea1.setText(consultarUltimoProyecto(losProyectos)));
+        jButton6.addActionListener(e -> jTextArea1.setText(
+                consultarTodosProyectos(losProyectos)));
+        
+        jButton7.addActionListener(e -> jTextArea1.setText(
+                consultarProyectosEnCurso(losProyectos)));
+        
+        jButton8.addActionListener(e -> jTextArea1.setText(
+                consultarPrimerProyecto(losProyectos)));
+        
+        jButton9.addActionListener(e -> jTextArea1.setText(
+                consultarUltimoProyecto(losProyectos)));
 
         // Consultas que leen los campos de texto (TextFields)
         jButton13.addActionListener(e -> jTextArea1.setText(
@@ -59,6 +71,19 @@ public class UsaProyecto extends javax.swing.JFrame {
         
         jButton12.addActionListener(e -> jTextArea1.setText(
                 consultarEquipoProyectoDadoCodigo(losProyectos, jTextField4.getText())));
+        
+                // Botones de archivos
+        jButton16.addActionListener(e -> jTextArea1.setText(
+                generarArchivoProyectos(losProyectos)));
+        
+        jButton17.addActionListener(e -> jTextArea1.setText(
+                generarArchivoClientes(losClientes)));
+        
+        jButton18.addActionListener(e -> jTextArea1.setText(
+                leerArchivoProyectos(losProyectos, losClientes)));
+        
+        jButton19.addActionListener(e -> jTextArea1.setText(
+                leerArchivoClientes(losClientes)));
     }
 
     /**
@@ -76,7 +101,6 @@ public class UsaProyecto extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
@@ -120,8 +144,6 @@ public class UsaProyecto extends javax.swing.JFrame {
 
         jButton3.setText("Registrar equipo");
 
-        jButton4.setText("Actualizar estado");
-
         jButton5.setText("Eliminar integrantes");
 
         jButton2.setText("Registrar integrantes");
@@ -144,10 +166,8 @@ public class UsaProyecto extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButton3)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton4)
-                        .addGap(18, 18, 18)
                         .addComponent(jButton5)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(261, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -162,7 +182,6 @@ public class UsaProyecto extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton3)
-                    .addComponent(jButton4)
                     .addComponent(jButton2)
                     .addComponent(jButton5))
                 .addGap(0, 15, Short.MAX_VALUE))
@@ -188,7 +207,7 @@ public class UsaProyecto extends javax.swing.JFrame {
 
         jLabel5.setText("Num. ID cliente");
 
-        jLabel6.setText("Num. ID projecto");
+        jLabel6.setText("Codigo projecto");
 
         jTextField2.addActionListener(this::jTextField2ActionPerformed);
 
@@ -758,6 +777,153 @@ public class UsaProyecto extends javax.swing.JFrame {
         }
         return sb.toString();
     }
+    
+        // ===================== ARCHIVOS =====================
+    private static final String ARCHIVO_CLIENTES = "clientes.txt";
+    private static final String ARCHIVO_PROYECTOS = "proyectos.txt";
+
+    /** Quita el separador y los saltos de línea para no dañar el archivo. */
+    private static String limpiar(String texto) {
+        return texto == null ? "" : texto.replace("|", "/").replace("\n", " ").trim();
+    }
+
+    /** Guarda los clientes. E = empresa, P = persona natural. */
+    public static String generarArchivoClientes(ArrayList<Cliente> datos) {
+        if (datos.isEmpty()) {
+            return "No hay clientes registrados para guardar.";
+        }
+        try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(ARCHIVO_CLIENTES))) {
+            for (Cliente c : datos) {
+                String base = limpiar(c.getNumeroIdentificacion()) + "|" + limpiar(c.getNombre())
+                        + "|" + limpiar(c.getNombreCiudad());
+                if (c instanceof ClienteEmpresa ce) {
+                    Contacto k = ce.getSuContacto();
+                    bw.write("E|" + base + "|" + limpiar(k.getNombreCompleto()) + "|" + limpiar(k.getCargo())
+                            + "|" + limpiar(k.getNumeroTelefono()) + "|" + limpiar(k.getCorreoElectronico()));
+                } else if (c instanceof ClientePersona cp) {
+                    bw.write("P|" + base + "|" + limpiar(cp.getNumeroTelefono()) + "|" + limpiar(cp.getCorreoElectronico()));
+                }
+                bw.newLine();
+            }
+            return "Archivo " + ARCHIVO_CLIENTES + " generado con " + datos.size() + " cliente(s).";
+        } catch (IOException e) {
+            return "Error al generar el archivo de clientes: " + e.getMessage();
+        }
+    }
+
+    /** Lee los clientes del archivo y reemplaza la lista actual. */
+    public static String leerArchivoClientes(ArrayList<Cliente> datos) {
+        if (!Files.exists(Paths.get(ARCHIVO_CLIENTES))) {
+            return "No existe el archivo " + ARCHIVO_CLIENTES + ". Primero genérelo.";
+        }
+        ArrayList<Cliente> leidos = new ArrayList<>();
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(ARCHIVO_CLIENTES))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.isBlank()) continue;
+                String[] d = linea.split("\\|", -1);
+                if (d[0].equals("E")) {
+                    // E|id|nombre|ciudad|contNombre|contCargo|contTelefono|contCorreo
+                    Contacto k = new Contacto(d[4], d[5], d[6], d[7]);
+                    leidos.add(new ClienteEmpresa(k, d[1], d[2], d[3]));
+                } else if (d[0].equals("P")) {
+                    // P|id|nombre|ciudad|telefono|correo
+                    leidos.add(new ClientePersona(d[4], d[5], d[1], d[2], d[3]));
+                }
+            }
+        } catch (IOException | ArrayIndexOutOfBoundsException e) {
+            return "Error al leer el archivo de clientes: " + e.getMessage();
+        }
+        datos.clear();
+        datos.addAll(leidos);
+        return "Se leyeron " + leidos.size() + " cliente(s) del archivo.";
+    }
+
+    /** Guarda los proyectos: datos, id del cliente, gerente y equipo en una sola línea. */
+    public static String generarArchivoProyectos(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) {
+            return "No hay proyectos registrados para guardar.";
+        }
+        try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(ARCHIVO_PROYECTOS))) {
+            for (Proyecto p : datos) {
+                Empleado g = p.getSuGerente();
+                StringBuilder linea = new StringBuilder();
+                linea.append(limpiar(p.getCodigo())).append("|")
+                     .append(limpiar(p.getTitulo())).append("|")
+                     .append(p.getFechaInicio()).append("|")
+                     .append(limpiar(p.getUnidadDuracion())).append("|")
+                     .append(p.getDuracionEstimada()).append("|")
+                     .append(limpiar(p.getEstado())).append("|")
+                     .append(limpiar(p.getSuCliente().getNumeroIdentificacion())).append("|")
+                     .append(limpiar(g.getNumeroIdentificacion())).append("|")
+                     .append(limpiar(g.getNombreCompleto())).append("|")
+                     .append(limpiar(g.getTituloProfesional())).append("|")
+                     .append(g.getAniosExperiencia()).append("|")
+                     .append(p.getSuEquipo().size());
+                for (Empleado e : p.getSuEquipo()) {
+                    linea.append("|").append(limpiar(e.getNumeroIdentificacion()))
+                         .append("|").append(limpiar(e.getNombreCompleto()))
+                         .append("|").append(limpiar(e.getTituloProfesional()))
+                         .append("|").append(e.getAniosExperiencia());
+                }
+                bw.write(linea.toString());
+                bw.newLine();
+            }
+            return "Archivo " + ARCHIVO_PROYECTOS + " generado con " + datos.size() + " proyecto(s).";
+        } catch (IOException e) {
+            return "Error al generar el archivo de proyectos: " + e.getMessage();
+        }
+    }
+
+    /** Lee los proyectos del archivo. Los clientes ya deben estar cargados (lea primero el archivo de clientes). */
+    public static String leerArchivoProyectos(ArrayList<Proyecto> datos, ArrayList<Cliente> clientes) {
+        if (!Files.exists(Paths.get(ARCHIVO_PROYECTOS))) {
+            return "No existe el archivo " + ARCHIVO_PROYECTOS + ". Primero genérelo.";
+        }
+        ArrayList<Proyecto> leidos = new ArrayList<>();
+        int omitidos = 0;
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(ARCHIVO_PROYECTOS))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.isBlank()) continue;
+                String[] d = linea.split("\\|", -1);
+
+                // Se busca el cliente por su ID entre los clientes cargados
+                Cliente cliente = null;
+                for (Cliente c : clientes) {
+                    if (c.getNumeroIdentificacion().equals(d[6])) {
+                        cliente = c;
+                        break;
+                    }
+                }
+                if (cliente == null) {
+                    omitidos++;
+                    continue;
+                }
+
+                Empleado gerente = new Empleado(d[7], d[8], d[9], Byte.parseByte(d[10]));
+                Proyecto p = new Proyecto(d[0], d[1], java.time.LocalDate.parse(d[2]), d[3],
+                        Byte.parseByte(d[4]), cliente, gerente, d[5]);
+
+                int cantidad = Integer.parseInt(d[11]);
+                for (int i = 0; i < cantidad; i++) {
+                    int pos = 12 + i * 4;
+                    p.agregarIntegrante(new Empleado(d[pos], d[pos + 1], d[pos + 2], Byte.parseByte(d[pos + 3])));
+                }
+                leidos.add(p);
+            }
+        } catch (IOException | RuntimeException e) {
+            return "Error al leer el archivo de proyectos: " + e.getMessage();
+        }
+        datos.clear();
+        datos.addAll(leidos);
+        String mensaje = "Se leyeron " + leidos.size() + " proyecto(s) del archivo.";
+        if (omitidos > 0) {
+            mensaje += "\n" + omitidos + " proyecto(s) se omitieron porque su cliente no está cargado. "
+                    + "Lea primero el archivo de clientes.";
+        }
+        return mensaje;
+    }
 
     /**
      * @param args the command line arguments
@@ -796,7 +962,6 @@ public class UsaProyecto extends javax.swing.JFrame {
     private javax.swing.JButton jButton19;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
