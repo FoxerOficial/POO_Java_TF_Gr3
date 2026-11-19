@@ -704,26 +704,34 @@ public class UsaProyecto extends javax.swing.JFrame {
         return resultado;
     }
 
-    public static String consultarTodosProyectos(ArrayList<Proyecto> datos) {
-        if (datos.isEmpty()) return "No hay proyectos registrados.";
-        StringBuilder sb = new StringBuilder("--- TODOS LOS PROYECTOS ---\n\n");
-        for (Proyecto p : datos) {
-            sb.append(p.toString()).append("\nFecha fin: ").append(p.determinarFechaFinalizacion()).append("\n------------------\n");
+    public static String consultarTodosProyectos(ArrayList<Proyecto> losProyectos) {
+        String resultado = "CONSULTA DE TODOS LOS PROYECTOS\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
         }
-        return sb.toString();
+        for (Proyecto objProyecto : losProyectos) {
+            resultado += objProyecto.toString();
+            resultado += "\nFecha de finalizacion: " + objProyecto.determinarFechaFinalizacion();
+            resultado += "\n";
+        }
+        return resultado;
     }
 
-    public static String consultarProyectosEnCurso(ArrayList<Proyecto> datos) {
-        if (datos.isEmpty()) return "No hay proyectos registrados.";
-        StringBuilder sb = new StringBuilder("--- PROYECTOS EN CURSO ---\n\n");
-        boolean enc = false;
-        for (Proyecto p : datos) {
-            if ("EN CURSO".equalsIgnoreCase(p.getEstado())) {
-                sb.append(p.toString()).append("\nFecha fin: ").append(p.determinarFechaFinalizacion()).append("\n------------------\n");
-                enc = true;
+    public static String consultarProyectosEnCurso(ArrayList<Proyecto> losProyectos) {
+        String resultado = "CONSULTA DE LOS PROYECTOS EN CURSO\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
+        }
+        for (Proyecto objProyecto : losProyectos) {
+            if (objProyecto.getEstado().equals("EN CURSO")) {
+                resultado += objProyecto.toString();
+                resultado += "\nFecha de finalizacion: " + objProyecto.determinarFechaFinalizacion();
+                resultado += "\n";
             }
         }
-        return enc ? sb.toString() : "No hay proyectos en curso.";
+        return resultado;
     }
 
     public static String consultarPrimerProyecto(ArrayList<Proyecto> datos) {
