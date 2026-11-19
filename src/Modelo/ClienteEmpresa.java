@@ -29,7 +29,9 @@ public final class ClienteEmpresa extends Cliente{
 
     @Override
     public String toString() {
-        return super.toString() + " Empresa{suContacto=" + suContacto + "}";
+        return super.toString()
+             + "\nContacto:"
+             + "\n" + suContacto;
     }
 
   

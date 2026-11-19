@@ -56,7 +56,10 @@ public class Contacto {
 
     @Override
     public String toString() {
-        return "Contacto{" + "nombreCompleto=" + nombreCompleto + ", cargo=" + cargo + ", numeroTelefono=" + numeroTelefono + ", correoElectronico=" + correoElectronico + '}';
+        return "Nombre: " + nombreCompleto
+             + "\nCargo: " + cargo
+             + "\nTeléfono: " + numeroTelefono
+             + "\nCorreo electrónico: " + correoElectronico;
     }
     
   

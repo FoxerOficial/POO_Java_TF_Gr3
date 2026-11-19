@@ -54,7 +54,9 @@ public abstract class Cliente {
 
     @Override
     public String toString() {
-        return "Cliente{" + "numeroIdentificacion=" + numeroIdentificacion + ", nombreCompleto=" + nombre + ", nombreCiudad=" + nombreCiudad + '}';
+        return "Identificación: " + numeroIdentificacion
+             + "\nNombre: " + nombre
+             + "\nCiudad: " + nombreCiudad;
     }
     
     
