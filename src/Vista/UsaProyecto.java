@@ -671,39 +671,37 @@ public class UsaProyecto extends javax.swing.JFrame {
         return anioActual + "-" + String.format("%03d", consecutivo + 1);
     }
     /** 8. Consultar los proyectos dados el número de identificación del gerente. */
-    public static String consultarProyectosDadoNumIDEGerente(ArrayList<Proyecto> datos, String numIDEGerente) {
-        if (datos.isEmpty()) {
-            return "No hay proyectos registrados.";
+    public static String consultarProyectosDadoNumIDEGerente(ArrayList<Proyecto> losProyectos, String numIDEGerente) {
+        String resultado = "CONSULTA DE LOS PROYECTOS DADO EL NUMERO DE IDENTIFICACION DEL GERENTE\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
         }
-        StringBuilder resultado = new StringBuilder("--- PROYECTOS DEL GERENTE (ID: " + numIDEGerente + ") ---\n\n");
-        boolean encontrados = false;
-        for (Proyecto p : datos) {
-            if (p.getSuGerente() != null && p.getSuGerente().getNumeroIdentificacion().equals(numIDEGerente.trim())) {
-                resultado.append(p.toString())
-                         .append("\nFecha de finalización estimada: ").append(p.determinarFechaFinalizacion())
-                         .append("\n--------------------------------------------------\n");
-                encontrados = true;
+        for (Proyecto objProyecto : losProyectos) {
+            if (objProyecto.getSuGerente().getNumeroIdentificacion().equals(numIDEGerente)) {
+                resultado += objProyecto.toString();
+                resultado += "\nFecha de finalizacion: " + objProyecto.determinarFechaFinalizacion();
+                resultado += "\n";
             }
         }
-        return encontrados ? resultado.toString() : "No se encontraron proyectos para el gerente con ID " + numIDEGerente;
+        return resultado;
     }
 
     /** 9. Consultar los proyectos dados el número de identificación del cliente. */
-    public static String consultarProyectosDadoNumIDECliente(ArrayList<Proyecto> datos, String numIDECliente) {
-        if (datos.isEmpty()) {
-            return "No hay proyectos registrados.";
+    public static String consultarProyectosDadoNumIDECliente(ArrayList<Proyecto> losProyectos, String numIDECliente) {
+        String resultado = "CONSULTA DE LOS PROYECTOS DADO EL NUMERO DE IDENTIFICACION DEL CLIENTE\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
         }
-        StringBuilder resultado = new StringBuilder("--- PROYECTOS DEL CLIENTE (ID: " + numIDECliente + ") ---\n\n");
-        boolean encontrados = false;
-        for (Proyecto p : datos) {
-            if (p.getSuCliente() != null && p.getSuCliente().getNumeroIdentificacion().equals(numIDECliente.trim())) {
-                resultado.append(p.toString())
-                         .append("\nFecha de finalización estimada: ").append(p.determinarFechaFinalizacion())
-                         .append("\n--------------------------------------------------\n");
-                encontrados = true;
+        for (Proyecto objProyecto : losProyectos) {
+            if (objProyecto.getSuCliente().getNumeroIdentificacion().equals(numIDECliente)) {
+                resultado += objProyecto.toString();
+                resultado += "\nFecha de finalizacion: " + objProyecto.determinarFechaFinalizacion();
+                resultado += "\n";
             }
         }
-        return encontrados ? resultado.toString() : "No se encontraron proyectos para el cliente con ID " + numIDECliente;
+        return resultado;
     }
 
     public static String consultarTodosProyectos(ArrayList<Proyecto> datos) {
@@ -740,23 +738,39 @@ public class UsaProyecto extends javax.swing.JFrame {
         return "--- ÚLTIMO PROYECTO ---\n\n" + p.toString() + "\nFecha fin: " + p.determinarFechaFinalizacion();
     }
 
-    public static String consultarGerenteProyectoDadoCodigo(ArrayList<Proyecto> datos, String cod) {
-        if (datos.isEmpty()) return "No hay proyectos registrados.";
-        Proyecto p = buscarProyectoPorCodigo(datos, cod);
-        if (p == null) return "No existe el proyecto con código " + cod;
-        return "--- GERENTE DEL PROYECTO " + p.getCodigo() + " ---\n" + p.getSuGerente().toString();
+    public static String consultarGerenteProyectoDadoCodigo(ArrayList<Proyecto> losProyectos, String codigoProyecto) {
+        String resultado = "CONSULTA DEL GERENTE DEL PROYECTO DADO EL CODIGO\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
+        }
+        for (Proyecto objProyecto : losProyectos) {
+            if (objProyecto.getCodigo().equals(codigoProyecto)) {
+                resultado += "Proyecto: " + objProyecto.getTitulo();
+                resultado += "\n" + objProyecto.getSuGerente().toString();
+                resultado += "\n";
+            }
+        }
+        return resultado;
     }
 
-    public static String consultarEquipoProyectoDadoCodigo(ArrayList<Proyecto> datos, String cod) {
-        if (datos.isEmpty()) return "No hay proyectos registrados.";
-        Proyecto p = buscarProyectoPorCodigo(datos, cod);
-        if (p == null) return "No existe el proyecto con código " + cod;
-        if (p.getSuEquipo().isEmpty()) return "El proyecto no tiene equipo.";
-        StringBuilder sb = new StringBuilder("--- EQUIPO PROYECTO " + p.getCodigo() + " ---\n");
-        for (var e : p.getSuEquipo()) {
-            sb.append(e.toString()).append("\n------------------\n");
+    public static String consultarEquipoProyectoDadoCodigo(ArrayList<Proyecto> losProyectos, String codigoProyecto) {
+        String resultado = "CONSULTA DEL EQUIPO DEL PROYECTO DADO EL CODIGO\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
         }
-        return sb.toString();
+        for (Proyecto objProyecto : losProyectos) {
+            if (objProyecto.getCodigo().equals(codigoProyecto)) {
+                resultado += "Proyecto: " + objProyecto.getTitulo();
+                resultado += "\n";
+                for (Empleado objEmpleado : objProyecto.getSuEquipo()) {
+                    resultado += objEmpleado.toString();
+                    resultado += "\n";
+                }
+            }
+        }
+        return resultado;
     }
 
     /**
