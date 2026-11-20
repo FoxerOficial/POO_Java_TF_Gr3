@@ -13,6 +13,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  *
@@ -72,18 +77,22 @@ public class UsaProyecto extends javax.swing.JFrame {
         jButton12.addActionListener(e -> jTextArea1.setText(
                 consultarEquipoProyectoDadoCodigo(losProyectos, jTextField4.getText())));
         
-                // Botones de archivos
-        jButton16.addActionListener(e -> jTextArea1.setText(
-                generarArchivoProyectos(losProyectos)));
-        
-        jButton17.addActionListener(e -> jTextArea1.setText(
-                generarArchivoClientes(losClientes)));
-        
-        jButton18.addActionListener(e -> jTextArea1.setText(
-                leerArchivoProyectos(losProyectos, losClientes)));
-        
-        jButton19.addActionListener(e -> jTextArea1.setText(
-                leerArchivoClientes(losClientes)));
+        jButton16.addActionListener(e -> generarArchivoDeObjetosProyectos(losProyectos));
+        jButton17.addActionListener(e -> generarArchivoDeObjetosClientes(losProyectos));
+        jButton18.addActionListener(e -> {
+            ArrayList<Proyecto> leidos = leerArchivoDeObjetosProyectos();
+            if (!leidos.isEmpty()) {   // si falló la lectura, no borramos lo que ya hay en memoria
+                losProyectos = leidos;
+                JOptionPane.showMessageDialog(null, "Se cargaron " + leidos.size() + " proyecto(s).");
+            }
+        });
+        jButton19.addActionListener(e -> {
+            ArrayList<Cliente> leidos = leerArchivoDeObjetosClientes();
+            if (!leidos.isEmpty()) {
+                losClientes = leidos;
+                JOptionPane.showMessageDialog(null, "Se cargaron " + leidos.size() + " cliente(s).");
+            }
+        });
     }
 
     /**
@@ -778,151 +787,86 @@ public class UsaProyecto extends javax.swing.JFrame {
         return sb.toString();
     }
     
-        // ===================== ARCHIVOS =====================
-    private static final String ARCHIVO_CLIENTES = "clientes.txt";
-    private static final String ARCHIVO_PROYECTOS = "proyectos.txt";
+        // ===================== GENERAR Y LEER =====================
 
-    /** Quita el separador y los saltos de línea para no dañar el archivo. */
-    private static String limpiar(String texto) {
-        return texto == null ? "" : texto.replace("|", "/").replace("\n", " ").trim();
-    }
-
-    /** Guarda los clientes. E = empresa, P = persona natural. */
-    public static String generarArchivoClientes(ArrayList<Cliente> datos) {
+    /** Guarda cada proyecto de la lista en el archivo "datosProyectos". */
+    public static void generarArchivoDeObjetosProyectos(ArrayList<Proyecto> datos) {
         if (datos.isEmpty()) {
-            return "No hay clientes registrados para guardar.";
+            JOptionPane.showMessageDialog(null, "No hay proyectos registrados para guardar.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-        try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(ARCHIVO_CLIENTES))) {
-            for (Cliente c : datos) {
-                String base = limpiar(c.getNumeroIdentificacion()) + "|" + limpiar(c.getNombre())
-                        + "|" + limpiar(c.getNombreCiudad());
-                if (c instanceof ClienteEmpresa ce) {
-                    Contacto k = ce.getSuContacto();
-                    bw.write("E|" + base + "|" + limpiar(k.getNombreCompleto()) + "|" + limpiar(k.getCargo())
-                            + "|" + limpiar(k.getNumeroTelefono()) + "|" + limpiar(k.getCorreoElectronico()));
-                } else if (c instanceof ClientePersona cp) {
-                    bw.write("P|" + base + "|" + limpiar(cp.getNumeroTelefono()) + "|" + limpiar(cp.getCorreoElectronico()));
-                }
-                bw.newLine();
-            }
-            return "Archivo " + ARCHIVO_CLIENTES + " generado con " + datos.size() + " cliente(s).";
-        } catch (IOException e) {
-            return "Error al generar el archivo de clientes: " + e.getMessage();
-        }
-    }
-
-    /** Lee los clientes del archivo y reemplaza la lista actual. */
-    public static String leerArchivoClientes(ArrayList<Cliente> datos) {
-        if (!Files.exists(Paths.get(ARCHIVO_CLIENTES))) {
-            return "No existe el archivo " + ARCHIVO_CLIENTES + ". Primero genérelo.";
-        }
-        ArrayList<Cliente> leidos = new ArrayList<>();
-        try (BufferedReader br = Files.newBufferedReader(Paths.get(ARCHIVO_CLIENTES))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                if (linea.isBlank()) continue;
-                String[] d = linea.split("\\|", -1);
-                if (d[0].equals("E")) {
-                    // E|id|nombre|ciudad|contNombre|contCargo|contTelefono|contCorreo
-                    Contacto k = new Contacto(d[4], d[5], d[6], d[7]);
-                    leidos.add(new ClienteEmpresa(k, d[1], d[2], d[3]));
-                } else if (d[0].equals("P")) {
-                    // P|id|nombre|ciudad|telefono|correo
-                    leidos.add(new ClientePersona(d[4], d[5], d[1], d[2], d[3]));
-                }
-            }
-        } catch (IOException | ArrayIndexOutOfBoundsException e) {
-            return "Error al leer el archivo de clientes: " + e.getMessage();
-        }
-        datos.clear();
-        datos.addAll(leidos);
-        return "Se leyeron " + leidos.size() + " cliente(s) del archivo.";
-    }
-
-    /** Guarda los proyectos: datos, id del cliente, gerente y equipo en una sola línea. */
-    public static String generarArchivoProyectos(ArrayList<Proyecto> datos) {
-        if (datos.isEmpty()) {
-            return "No hay proyectos registrados para guardar.";
-        }
-        try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(ARCHIVO_PROYECTOS))) {
+        try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream("datosProyectos"))) {
             for (Proyecto p : datos) {
-                Empleado g = p.getSuGerente();
-                StringBuilder linea = new StringBuilder();
-                linea.append(limpiar(p.getCodigo())).append("|")
-                     .append(limpiar(p.getTitulo())).append("|")
-                     .append(p.getFechaInicio()).append("|")
-                     .append(limpiar(p.getUnidadDuracion())).append("|")
-                     .append(p.getDuracionEstimada()).append("|")
-                     .append(limpiar(p.getEstado())).append("|")
-                     .append(limpiar(p.getSuCliente().getNumeroIdentificacion())).append("|")
-                     .append(limpiar(g.getNumeroIdentificacion())).append("|")
-                     .append(limpiar(g.getNombreCompleto())).append("|")
-                     .append(limpiar(g.getTituloProfesional())).append("|")
-                     .append(g.getAniosExperiencia()).append("|")
-                     .append(p.getSuEquipo().size());
-                for (Empleado e : p.getSuEquipo()) {
-                    linea.append("|").append(limpiar(e.getNumeroIdentificacion()))
-                         .append("|").append(limpiar(e.getNombreCompleto()))
-                         .append("|").append(limpiar(e.getTituloProfesional()))
-                         .append("|").append(e.getAniosExperiencia());
-                }
-                bw.write(linea.toString());
-                bw.newLine();
+                salida.writeObject(p);
             }
-            return "Archivo " + ARCHIVO_PROYECTOS + " generado con " + datos.size() + " proyecto(s).";
-        } catch (IOException e) {
-            return "Error al generar el archivo de proyectos: " + e.getMessage();
+            JOptionPane.showMessageDialog(null, "Operación exitosa, archivo de proyectos generado correctamente.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error almacenando datos en archivo.\n"
+                    + "Revisar serialización de clases.", "GENERACIÓN DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /** Lee los proyectos del archivo. Los clientes ya deben estar cargados (lea primero el archivo de clientes). */
-    public static String leerArchivoProyectos(ArrayList<Proyecto> datos, ArrayList<Cliente> clientes) {
-        if (!Files.exists(Paths.get(ARCHIVO_PROYECTOS))) {
-            return "No existe el archivo " + ARCHIVO_PROYECTOS + ". Primero genérelo.";
+    /** Lee todos los proyectos del archivo "datosProyectos" y devuelve la lista. */
+    public static ArrayList<Proyecto> leerArchivoDeObjetosProyectos() {
+        ArrayList<Proyecto> datos = new ArrayList<>();
+        try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream("datosProyectos"))) {
+            while (true) {
+                datos.add((Proyecto) entrada.readObject());
+            }
+        } catch (EOFException ex) {
+            // Fin del archivo: es la forma normal de terminar el ciclo
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error recuperando datos desde archivo.",
+                    "LECTURA DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
         }
-        ArrayList<Proyecto> leidos = new ArrayList<>();
-        int omitidos = 0;
-        try (BufferedReader br = Files.newBufferedReader(Paths.get(ARCHIVO_PROYECTOS))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                if (linea.isBlank()) continue;
-                String[] d = linea.split("\\|", -1);
+        return datos;
+    }
 
-                // Se busca el cliente por su ID entre los clientes cargados
-                Cliente cliente = null;
-                for (Cliente c : clientes) {
-                    if (c.getNumeroIdentificacion().equals(d[6])) {
-                        cliente = c;
+    /** Guarda el cliente de cada proyecto en el archivo "datosClientes". */
+    public static void generarArchivoDeObjetosClientes(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay proyectos registrados, así que no hay clientes para guardar.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream("datosClientes"))) {
+            for (Proyecto p : datos) {
+                salida.writeObject(p.getSuCliente());
+            }
+            JOptionPane.showMessageDialog(null, "Operación exitosa, archivo de clientes generado correctamente.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error almacenando datos en archivo.\n"
+                    + "Revisar serialización de clases.", "GENERACIÓN DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Lee los clientes de "datosClientes" sin repetir ninguno (por número de identificación). */
+    public static ArrayList<Cliente> leerArchivoDeObjetosClientes() {
+        ArrayList<Cliente> datos = new ArrayList<>();
+        try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream("datosClientes"))) {
+            while (true) {
+                Cliente c = (Cliente) entrada.readObject();
+                boolean repetido = false;
+                for (Cliente existente : datos) {
+                    if (existente.getNumeroIdentificacion().equals(c.getNumeroIdentificacion())) {
+                        repetido = true;
                         break;
                     }
                 }
-                if (cliente == null) {
-                    omitidos++;
-                    continue;
+                if (!repetido) {
+                    datos.add(c);
                 }
-
-                Empleado gerente = new Empleado(d[7], d[8], d[9], Byte.parseByte(d[10]));
-                Proyecto p = new Proyecto(d[0], d[1], java.time.LocalDate.parse(d[2]), d[3],
-                        Byte.parseByte(d[4]), cliente, gerente, d[5]);
-
-                int cantidad = Integer.parseInt(d[11]);
-                for (int i = 0; i < cantidad; i++) {
-                    int pos = 12 + i * 4;
-                    p.agregarIntegrante(new Empleado(d[pos], d[pos + 1], d[pos + 2], Byte.parseByte(d[pos + 3])));
-                }
-                leidos.add(p);
             }
-        } catch (IOException | RuntimeException e) {
-            return "Error al leer el archivo de proyectos: " + e.getMessage();
+        } catch (EOFException ex) {
+            // Fin del archivo
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error recuperando datos desde archivo.",
+                    "LECTURA DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
         }
-        datos.clear();
-        datos.addAll(leidos);
-        String mensaje = "Se leyeron " + leidos.size() + " proyecto(s) del archivo.";
-        if (omitidos > 0) {
-            mensaje += "\n" + omitidos + " proyecto(s) se omitieron porque su cliente no está cargado. "
-                    + "Lea primero el archivo de clientes.";
-        }
-        return mensaje;
+        return datos;
     }
 
     /**

@@ -4,11 +4,13 @@
  */
 package Modelo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Sebastian Garcia Cardona
  */
-public class Contacto {
+public class Contacto implements Serializable{
     
     private String nombreCompleto;
     private String cargo;

@@ -4,11 +4,13 @@
  */
 package Modelo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Sebastian Garcia Cardona
  */
-public final class ClienteEmpresa extends Cliente{
+public final class ClienteEmpresa extends Cliente implements Serializable{
     
       private Contacto suContacto;
     
