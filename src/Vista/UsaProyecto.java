@@ -8,6 +8,16 @@ import Modelo.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  *
@@ -42,10 +52,17 @@ public class UsaProyecto extends javax.swing.JFrame {
         // Botón "Eliminar integrantes": quita un integrante del proyecto del campo "Codigo Proyecto"
         jButton5.addActionListener(e -> jTextArea1.setText(
                 eliminarIntegranteProyectoDadoCodigo(losProyectos, jTextField1.getText())));
-        jButton6.addActionListener(e -> jTextArea1.setText(consultarTodosProyectos(losProyectos)));
-        jButton7.addActionListener(e -> jTextArea1.setText(consultarProyectosEnCurso(losProyectos)));
-        jButton8.addActionListener(e -> jTextArea1.setText(consultarPrimerProyecto(losProyectos)));
-        jButton9.addActionListener(e -> jTextArea1.setText(consultarUltimoProyecto(losProyectos)));
+        jButton6.addActionListener(e -> jTextArea1.setText(
+                consultarTodosProyectos(losProyectos)));
+        
+        jButton7.addActionListener(e -> jTextArea1.setText(
+                consultarProyectosEnCurso(losProyectos)));
+        
+        jButton8.addActionListener(e -> jTextArea1.setText(
+                consultarPrimerProyecto(losProyectos)));
+        
+        jButton9.addActionListener(e -> jTextArea1.setText(
+                consultarUltimoProyecto(losProyectos)));
 
         // Consultas que leen los campos de texto (TextFields)
         jButton13.addActionListener(e -> jTextArea1.setText(
@@ -59,6 +76,23 @@ public class UsaProyecto extends javax.swing.JFrame {
         
         jButton12.addActionListener(e -> jTextArea1.setText(
                 consultarEquipoProyectoDadoCodigo(losProyectos, jTextField4.getText())));
+        
+        jButton16.addActionListener(e -> generarArchivoDeObjetosProyectos(losProyectos));
+        jButton17.addActionListener(e -> generarArchivoDeObjetosClientes(losProyectos));
+        jButton18.addActionListener(e -> {
+            ArrayList<Proyecto> leidos = leerArchivoDeObjetosProyectos();
+            if (!leidos.isEmpty()) {   // si falló la lectura, no borramos lo que ya hay en memoria
+                losProyectos = leidos;
+                JOptionPane.showMessageDialog(null, "Se cargaron " + leidos.size() + " proyecto(s).");
+            }
+        });
+        jButton19.addActionListener(e -> {
+            ArrayList<Cliente> leidos = leerArchivoDeObjetosClientes();
+            if (!leidos.isEmpty()) {
+                losClientes = leidos;
+                JOptionPane.showMessageDialog(null, "Se cargaron " + leidos.size() + " cliente(s).");
+            }
+        });
     }
 
     /**
@@ -76,7 +110,6 @@ public class UsaProyecto extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
@@ -120,8 +153,6 @@ public class UsaProyecto extends javax.swing.JFrame {
 
         jButton3.setText("Registrar equipo");
 
-        jButton4.setText("Actualizar estado");
-
         jButton5.setText("Eliminar integrantes");
 
         jButton2.setText("Registrar integrantes");
@@ -144,10 +175,8 @@ public class UsaProyecto extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButton3)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton4)
-                        .addGap(18, 18, 18)
                         .addComponent(jButton5)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(261, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -162,7 +191,6 @@ public class UsaProyecto extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton3)
-                    .addComponent(jButton4)
                     .addComponent(jButton2)
                     .addComponent(jButton5))
                 .addGap(0, 15, Short.MAX_VALUE))
@@ -188,7 +216,7 @@ public class UsaProyecto extends javax.swing.JFrame {
 
         jLabel5.setText("Num. ID cliente");
 
-        jLabel6.setText("Num. ID projecto");
+        jLabel6.setText("Codigo projecto");
 
         jTextField2.addActionListener(this::jTextField2ActionPerformed);
 
@@ -660,6 +688,34 @@ public class UsaProyecto extends javax.swing.JFrame {
     }
 
     /** Genera el código del proyecto: año-consecutivo (ej. 2026-001). El consecutivo reinicia cada año. */
+    /** Actualiza el estado del proyecto indicado (según el diagrama). */
+    public static String actualizarEstadoProyectoDadoCodigo(ArrayList<Proyecto> losProyectos, String codigoProyecto) {
+        String resultado = "ACTUALIZACION DEL ESTADO DEL PROYECTO\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
+        }
+        for (Proyecto objProyecto : losProyectos) {
+            if (objProyecto.getCodigo().equals(codigoProyecto)) {
+                String estadoAnterior = objProyecto.getEstado();
+                String[] estados = {"INICIADO", "EN CURSO", "CANCELADO", "FINALIZADO", "SUSPENDIDO", "APLAZADO"};
+                String nuevoEstado = (String) JOptionPane.showInputDialog(null, "Nuevo estado del proyecto:",
+                        "Actualizar estado", JOptionPane.QUESTION_MESSAGE, null, estados, estadoAnterior);
+                if (nuevoEstado == null) {
+                    resultado += "Operación cancelada.";
+                    return resultado;
+                }
+                objProyecto.setEstado(nuevoEstado);
+                resultado += "Proyecto: " + objProyecto.getTitulo();
+                resultado += "\nEstado anterior: " + estadoAnterior;
+                resultado += "\nEstado nuevo: " + nuevoEstado;
+                return resultado;
+            }
+        }
+        resultado += "No existe un proyecto con el código " + codigoProyecto;
+        return resultado;
+    }
+
     public static String generarCodigoProyecto(ArrayList<Proyecto> datos) {
         int anioActual = LocalDate.now().getYear();
         int consecutivo = 0;
@@ -780,6 +836,88 @@ public class UsaProyecto extends javax.swing.JFrame {
         }
         return resultado;
     }
+    
+        // ===================== GENERAR Y LEER =====================
+
+    /** Guarda cada proyecto de la lista en el archivo "datosProyectos". */
+    public static void generarArchivoDeObjetosProyectos(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay proyectos registrados para guardar.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream("datosProyectos"))) {
+            for (Proyecto p : datos) {
+                salida.writeObject(p);
+            }
+            JOptionPane.showMessageDialog(null, "Operación exitosa, archivo de proyectos generado correctamente.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error almacenando datos en archivo.\n"
+                    + "Revisar serialización de clases.", "GENERACIÓN DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Lee todos los proyectos del archivo "datosProyectos" y devuelve la lista. */
+    public static ArrayList<Proyecto> leerArchivoDeObjetosProyectos() {
+        ArrayList<Proyecto> datos = new ArrayList<>();
+        try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream("datosProyectos"))) {
+            while (true) {
+                datos.add((Proyecto) entrada.readObject());
+            }
+        } catch (EOFException ex) {
+            // Fin del archivo: es la forma normal de terminar el ciclo
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error recuperando datos desde archivo.",
+                    "LECTURA DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
+        }
+        return datos;
+    }
+
+    /** Guarda el cliente de cada proyecto en el archivo "datosClientes". */
+    public static void generarArchivoDeObjetosClientes(ArrayList<Proyecto> datos) {
+        if (datos.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay proyectos registrados, así que no hay clientes para guardar.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try (ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream("datosClientes"))) {
+            for (Proyecto p : datos) {
+                salida.writeObject(p.getSuCliente());
+            }
+            JOptionPane.showMessageDialog(null, "Operación exitosa, archivo de clientes generado correctamente.",
+                    "GENERACIÓN DE ARCHIVO", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error almacenando datos en archivo.\n"
+                    + "Revisar serialización de clases.", "GENERACIÓN DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Lee los clientes de "datosClientes" sin repetir ninguno (por número de identificación). */
+    public static ArrayList<Cliente> leerArchivoDeObjetosClientes() {
+        ArrayList<Cliente> datos = new ArrayList<>();
+        try (ObjectInputStream entrada = new ObjectInputStream(new FileInputStream("datosClientes"))) {
+            while (true) {
+                Cliente c = (Cliente) entrada.readObject();
+                boolean repetido = false;
+                for (Cliente existente : datos) {
+                    if (existente.getNumeroIdentificacion().equals(c.getNumeroIdentificacion())) {
+                        repetido = true;
+                        break;
+                    }
+                }
+                if (!repetido) {
+                    datos.add(c);
+                }
+            }
+        } catch (EOFException ex) {
+            // Fin del archivo
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Operación fallida: error recuperando datos desde archivo.",
+                    "LECTURA DE ARCHIVO", JOptionPane.ERROR_MESSAGE);
+        }
+        return datos;
+    }
 
     /**
      * @param args the command line arguments
@@ -818,7 +956,6 @@ public class UsaProyecto extends javax.swing.JFrame {
     private javax.swing.JButton jButton19;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;

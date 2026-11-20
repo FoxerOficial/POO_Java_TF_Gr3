@@ -4,11 +4,13 @@
  */
 package Modelo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Sebastian Garcia Cardona
  */
-public final class ClienteEmpresa extends Cliente{
+public final class ClienteEmpresa extends Cliente implements Serializable{
     
       private Contacto suContacto;
     
@@ -22,10 +24,13 @@ public final class ClienteEmpresa extends Cliente{
     }
     
     
+ 
+    public Contacto getSuContacto() { 
+        return suContacto; 
+    }
     
-    public Contacto getSuContacto() { return suContacto; }
-    
-    public void setSuContacto(Contacto suContacto) { this.suContacto = suContacto; }
+    public void setSuContacto(Contacto suContacto) { 
+        this.suContacto = suContacto; }
 
     @Override
     public String toString() {
