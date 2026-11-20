@@ -4,13 +4,15 @@
  */
 package Modelo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author juan David Perafan
  * @version 1.0 - noviembre 11 de 2026
  */
 
-public class Empleado {
+public class Empleado implements Serializable{
 
     private String numeroIdentificacion;
     private String nombreCompleto;

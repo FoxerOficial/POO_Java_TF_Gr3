@@ -4,12 +4,14 @@
  */
 package Modelo;
 
+import java.io.Serializable;
+
 
 /**
  *
  * @author Sebastian Garcia Cardona
  */
-public final class ClientePersona extends Cliente{
+public final class ClientePersona extends Cliente implements Serializable{
     /*
      * Atributos
     */
