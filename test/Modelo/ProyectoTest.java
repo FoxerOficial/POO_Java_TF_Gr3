@@ -5,9 +5,9 @@ package Modelo;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -26,7 +26,7 @@ public class ProyectoTest {
      * Antes de cada prueba se arma un proyecto de ejemplo, para no repetir
      * los mismos datos en todas las pruebas.
      */
-    @BeforeEach
+    @Before
     public void setUp() {
         elCliente = new ClientePersona("3155551122", "ana@correo.com", "1144", "Ana Ruiz", "Cali");
         elGerente = new Empleado("900", "Luis Gomez", "Ingeniero de sistemas", (byte) 10);
