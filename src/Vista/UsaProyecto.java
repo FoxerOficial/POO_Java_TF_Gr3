@@ -688,6 +688,34 @@ public class UsaProyecto extends javax.swing.JFrame {
     }
 
     /** Genera el código del proyecto: año-consecutivo (ej. 2026-001). El consecutivo reinicia cada año. */
+    /** Actualiza el estado del proyecto indicado (según el diagrama). */
+    public static String actualizarEstadoProyectoDadoCodigo(ArrayList<Proyecto> losProyectos, String codigoProyecto) {
+        String resultado = "ACTUALIZACION DEL ESTADO DEL PROYECTO\n";
+        if (losProyectos.isEmpty()) {
+            resultado += "No hay proyectos registrados.";
+            return resultado;
+        }
+        for (Proyecto objProyecto : losProyectos) {
+            if (objProyecto.getCodigo().equals(codigoProyecto)) {
+                String estadoAnterior = objProyecto.getEstado();
+                String[] estados = {"INICIADO", "EN CURSO", "CANCELADO", "FINALIZADO", "SUSPENDIDO", "APLAZADO"};
+                String nuevoEstado = (String) JOptionPane.showInputDialog(null, "Nuevo estado del proyecto:",
+                        "Actualizar estado", JOptionPane.QUESTION_MESSAGE, null, estados, estadoAnterior);
+                if (nuevoEstado == null) {
+                    resultado += "Operación cancelada.";
+                    return resultado;
+                }
+                objProyecto.setEstado(nuevoEstado);
+                resultado += "Proyecto: " + objProyecto.getTitulo();
+                resultado += "\nEstado anterior: " + estadoAnterior;
+                resultado += "\nEstado nuevo: " + nuevoEstado;
+                return resultado;
+            }
+        }
+        resultado += "No existe un proyecto con el código " + codigoProyecto;
+        return resultado;
+    }
+
     public static String generarCodigoProyecto(ArrayList<Proyecto> datos) {
         int anioActual = LocalDate.now().getYear();
         int consecutivo = 0;
